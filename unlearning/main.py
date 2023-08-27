@@ -31,10 +31,10 @@ def main():
     model = Model(500)
     stats = model.fit(train_features, train_targets, test_features, test_targets)
     y_hat = model.predict(test_features)
-    roc = roc_auc_score(test_t, y_hat)
-    stats['roc'] = roc
-    importance = model.importance
-    grouth_rate = np.diff(importance, axis=0)
+    # roc = roc_auc_score(test_t, y_hat)
+    # stats['roc'] = roc
+    importance = None# model.importance
+    # grouth_rate = np.diff(importance, axis=0)
     return stats, importance
 
 
@@ -48,9 +48,8 @@ def plot_learning_curves(stat: dict):
 
 if __name__ == '__main__':
     stat, imp = main()
-    print(f"AUC {stat['roc']}")
+    # print(f"AUC {stat['roc']}")
     # imp is a sample importance
     # plot_learning_curves(stat)
 
-    # TODO see https://pytorch.org/tutorials/intermediate/per_sample_grads.html
 
