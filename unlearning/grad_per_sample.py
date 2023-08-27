@@ -18,11 +18,13 @@ class Model:
         self.controller_epochs = controller_epochs
         self.controller = None
         self.net = None
+        self.w0 = None
 
     def fit(self, x: Tensor, y: Tensor, x_test: Tensor, y_test: Tensor):
         n_in = x.size(1)
         n_out = y.size(1) if y.ndim > 1 else 1
         net = Net(n_in, n_out)
+        self.w0 = deepcopy(net.layer.weight.detach())
         controller = Controller(n_in + 1, n_in)
         optimizer = Adam(params=net.parameters())
         c_optimizer = Adam(params=controller.parameters())
