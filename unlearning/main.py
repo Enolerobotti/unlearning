@@ -12,23 +12,47 @@ from copy import deepcopy
 # from unlearning.classic_model import Model
 from unlearning.grad_per_sample import Model
 
-seed = 42
-torch.manual_seed(seed)
-np.random.seed(seed)
-
-
-def main():
+# seed = 42
+# torch.manual_seed(seed)
+# np.random.seed(seed)
+def prepare():
     df = load_iris(as_frame=True)
     data = df.frame
     data = data[data.target != 2]
 
-    train_df, test_df = train_test_split(data)
+    return train_test_split(data)
+
+
+def train(train_df, test_df, poisson_idx):
+    scaler = StandardScaler()
+    train_f = scaler.fit_transform(train_df.iloc[:, :-1].values)
+    # train_f = train_f[~poisson_idx]
+    train_t = train_df.target.values
+    # train_t = train_t[~poisson_idx]
+
+    test_f = scaler.transform(test_df.iloc[:, :-1].values)
+    test_t = test_df.target.values
+    train_features = torch.tensor(train_f, dtype=torch.float32)
+    train_targets = torch.tensor(train_t, dtype=torch.float32).unsqueeze(dim=1)
+    test_features = torch.tensor(test_f, dtype=torch.float32)
+    test_targets = torch.tensor(test_t, dtype=torch.float32).unsqueeze(dim=1)
+    n_epochs = 150
+    model = Model(n_epochs)
+
+    stats = model.fit(train_features, train_targets, test_features, test_targets)
+    y_hat = model.predict(test_features)
+    roc = roc_auc_score(test_t, y_hat)
+    stats['roc'] = roc
+    return stats
+
+
+def main(train_df, test_df):
 
     scaler = StandardScaler()
     train_f = scaler.fit_transform(train_df.iloc[:, :-1].values)
     train_t = train_df.target.values
 
-    poisson_idx = np.random.choice(range(len(train_f)), size=(40, ), replace=False)
+    poisson_idx = np.random.choice(range(len(train_f)), size=(20, ), replace=False)
     train_t[poisson_idx] = 1 - train_t[poisson_idx]
 
     test_f = scaler.transform(test_df.iloc[:, :-1].values)
@@ -52,17 +76,16 @@ def main():
         features = model.grad_features(poisson_features, e)
         grad_per_sample = model.predict_grad(features)
         grad += grad_per_sample.mean(dim=0)
-        # model.net.layer.weight = Parameter(model.net.layer.weight - grad * 0.003)  # TODO this is not I was gonna do. Use my formula instead
-    lr = 0.003
+    lr = -0.003
     s = len(train_features)
     p = len(poisson_features)
-    model.net.layer.weight = Parameter((s * (model.net.layer.weight - model.w0) - lr * grad) / (s-p) + model.w0)
+    # print(model.net.layer.weight - model.w0)
+    model.net.layer.weight = Parameter((s * (model.net.layer.weight - model.w0) - lr * grad) / (s-p) + model.w0)  # why plus
     y_hat = model.predict(test_features)
     roc2 = roc_auc_score(test_t, y_hat)
     stats['roc_cured'] = roc2
 
-
-    return stats, None
+    return stats, poisson_idx
 
 
 def plot_learning_curves(stat: dict):
@@ -74,12 +97,15 @@ def plot_learning_curves(stat: dict):
 
 
 if __name__ == '__main__':
-    stat, imp = main()
+    train_df, test_df = prepare()
+    stat, pi = main(train_df, test_df)
+    stat1 = train(train_df, test_df, pi)
     df = pd.DataFrame(stat)
     # print(df)
     # print(f"AUC {stat['roc_auc'][-1]}")
-    print(f"AUC {stat['roc']}")
-    print(f"AUC {stat['roc_cured']}")
+    print(f"AUC no poisson {stat1['roc']}")
+    print(f"AUC poisson {stat['roc']}")
+    print(f"AUC healed {stat['roc_cured']}")
     # imp is a sample importance
     # plot_learning_curves(stat)
 

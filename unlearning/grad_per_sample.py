@@ -12,7 +12,7 @@ from unlearning.controller import Controller
 
 
 class Model:
-    def __init__(self, epochs: int, controller_epochs: int = 10):
+    def __init__(self, epochs: int, controller_epochs: int = 100):
         self.net = None
         self.epochs = epochs
         self.controller_epochs = controller_epochs
@@ -103,7 +103,7 @@ class Model:
         return stat
 
     def grad_features(self, x: Tensor, epoch: int) -> Tensor:
-        return torch.concat([torch.ones(size=(len(x), 1)) * (self.epochs - epoch) / self.epochs, x], dim=1)
+        return torch.concat([torch.ones(size=(len(x), 1)) * epoch / self.epochs, x], dim=1)
 
     def predict(self, x: Tensor):
         self.net.eval()
