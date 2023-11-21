@@ -51,9 +51,12 @@ class Model:
                 _sample_grads.append(sg[0])
 
             sample_grads = torch.concat(_sample_grads)
-            external_grad = sample_grads.mean()
+            external_grad = sample_grads.mean(dim=0)
             train_loss = loss.mean()
-            train_loss.backward()#gradient=external_grad)
+            train_loss.backward()
+            ref_grads = net.layer.weight.grad
+            ref = (external_grad-ref_grads).mean().item()
+            assert ref < 1e-7, f"{ref}"
             optimizer.step()
 
             net.eval()

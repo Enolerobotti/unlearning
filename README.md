@@ -7,7 +7,7 @@ which learns how a sample affects the gradient. For this purpose we count gradie
 Finally, when we want to unlearn some specific subset, we predict their impacts on the gradient
 and substitute these gradients from the model parameters.
 
-In general, this approach gives positive result
+In general, this approach gives positive result. For example,
 ```
 AUC no poisson 1.0
 AUC poisson 0.858974358974359
