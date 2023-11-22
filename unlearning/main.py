@@ -1,26 +1,17 @@
 import torch
 from torch.nn import Parameter
 import numpy as np
-from sklearn.datasets import load_iris
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 import pandas as pd
 import matplotlib.pyplot as plt
-from copy import deepcopy
 
-# from unlearning.classic_model import Model
+from unlearning.data import prepare
 from unlearning.grad_per_sample import Model
 
 # seed = 42
 # torch.manual_seed(seed)
 # np.random.seed(seed)
-def prepare():
-    df = load_iris(as_frame=True)
-    data = df.frame
-    data = data[data.target != 2]
-
-    return train_test_split(data)
 
 
 def train(train_df, test_df, poisson_idx):
