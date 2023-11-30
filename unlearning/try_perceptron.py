@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from unlearning.data import prepare
-from unlearning.grad_per_sample import Model
+from unlearning.perceptron_model import Model
 
 # seed = 42
 # torch.manual_seed(seed)
@@ -72,6 +72,7 @@ def main(train_df, test_df):
     p = len(poisson_features)
     # print(model.net.layer.weight - model.w0)
     model.net.layer.weight = Parameter((s * (model.net.layer.weight - model.w0) - lr * grad) / (s-p) + model.w0)  # why plus
+    # plus is because I have read my formula incorrectly
     y_hat = model.predict(test_features)
     roc2 = roc_auc_score(test_t, y_hat)
     stats['roc_cured'] = roc2
