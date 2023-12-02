@@ -9,6 +9,7 @@ from torch.optim import Adam
 from unlearning.net import Net
 
 
+# Deprecated
 class Model:
     def __init__(self, epochs: int):
         self.net = None

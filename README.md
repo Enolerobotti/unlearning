@@ -9,8 +9,8 @@ and substitute these gradients from the model parameters.
 
 In general, this approach gives positive result. For example,
 ```
-AUC no poisson 1.0
-AUC poisson 0.858974358974359
+AUC no poison 1.0
+AUC poison 0.858974358974359
 AUC healed 0.9807692307692308
 ```
 However, for some seeds this has no effect
